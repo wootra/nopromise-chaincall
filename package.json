@@ -1,0 +1,38 @@
+{
+  "name": "nopromise-chaincall",
+  "version": "1.0.0",
+  "description": "function that make syncronous chain call pretty and effectively by using a single promise.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wootra/nopromise-chaincall.git"
+  },
+  "keywords": [
+    "nopromise",
+    "chaincall",
+    "nopromise-chaincall",
+    "chain",
+    "promise",
+    "call"
+  ],
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
+  "author": "Songhyeon Jun (shjeon0730@gmail.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wootra/nopromise-chaincall/issues"
+  },
+  "homepage": "https://github.com/wootra/nopromise-chaincall#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "jest": "^24.9.0",
+    "jest-cli": "^24.9.0",
+    "sinon": "^8.0.1"
+  },
+  "directories": {
+    "test": "tests"
+  }
+}
