@@ -20,7 +20,7 @@
     "call"
   ],
   "publishConfig": { "registry": "https://npm.pkg.github.com/" },
-  "author": "Songhyeon Jun (shjeon0730@gmail.com)",
+  "author": "wootra (shjeon0730@gmail.com)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/wootra/nopromise-chaincall/issues"
