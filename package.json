@@ -1,5 +1,5 @@
 {
-  "name": "nopromise-chaincall",
+  "name": "chaincalljs",
   "version": "1.0.0",
   "description": "function that make syncronous chain call pretty and effectively by using a single promise.",
   "main": "src/index.js",
@@ -17,9 +17,9 @@
     "nopromise-chaincall",
     "chain",
     "promise",
-    "call"
+    "call",
+    "chaincalljs"
   ],
-  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "author": "Songhyeon Jun (shjeon0730@gmail.com)",
   "license": "MIT",
   "bugs": {

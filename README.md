@@ -1,4 +1,4 @@
-# NoPromise Chain Call helper
+# Chain Call helper (ChainCallJs)
 
 ## Spoiler
 
@@ -7,7 +7,7 @@ If you want to see how to use, go to  [How to use](#how-to-use) section directly
 ## how to install
 
 ```bash
-npm i nopromise-chaincall
+npm i chaincalljs
 ```
 
 
@@ -75,7 +75,7 @@ This module will help you to program like above and some of more extensive funct
 ### UseCase 1 - Pure Syncronous Chain Calls
 
 ```js
-const np = require('nopromise-chaincall');
+const np = require('chaincalljs');
 const ret = np.chainCallNp(
     [1,2,3,4,5],
     func1,
@@ -88,7 +88,7 @@ console.log('chainCallNp:', ret);
 ### UseCase 2 - async call with 1 Promise
 
 ```js
-const np = require('nopromise-chaincall');
+const np = require('chaincalljs');
 np.chainCall(
     [1,2,3,4,5],
     func1,
@@ -111,10 +111,10 @@ ret = func3(ret);
 console.log(ret);
 ```
 
-as you see, after 1st and 2nd call, you want to call callOther function with the result. using nopromise-chaincall module, you can call like this:
+as you see, after 1st and 2nd call, you want to call callOther function with the result. using chaincalljs module, you can call like this:
 
 ```js
-const np = require('nopromise-chaincall');
+const np = require('chaincalljs');
 const arr = [1,2,3,4,5];
 const ret = np.chainCallNp(
     arr,
@@ -125,6 +125,6 @@ const ret = np.chainCallNp(
 console.log(ret);
 ```
 
-the hoc function will return an object that the nopromise-chaincall module can understand, and do what you want to do.
+the hoc function will return an object that the chaincalljs module can understand, and do what you want to do.
 
 Enjoy!
