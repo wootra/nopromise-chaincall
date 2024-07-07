@@ -32,13 +32,13 @@
 		"url": "https://github.com/wootra/nopromise-chaincall.git"
 	},
 	"keywords": [
-		"nopromise",
 		"chaincall",
 		"nopromise-chaincall",
 		"chain",
-		"promise",
 		"call",
-		"chaincalljs"
+		"chaincalljs",
+		"chaincall-js",
+		"chain-call-js"
 	],
 	"author": "Songhyeon Jun (shjeon0730@gmail.com)",
 	"license": "MIT",
@@ -69,8 +69,5 @@
 		"typescript": "^5.4.5",
 		"typescript-eslint": "^7.15.0",
 		"vitest": "^1.6.0"
-	},
-	"directories": {
-		"test": "tests"
 	}
 }
