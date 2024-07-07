@@ -1,4 +1,4 @@
-Chaincalljs 2.0
+ChainCallJs 2.0
 
 # Overview
 
@@ -169,3 +169,12 @@ expect(isWorkIncreased).toBe(false);
 As you see, there are bunch of variables are created to help readability, but still it is very hard to find out the relationship of the each logic.
 
 with chaincalljs, you can organize the relationship easier to read by nature.
+
+
+## Support
+
+For support, questions, or to report issues related to the ChainCallJs, please use the GitHub [Issues page](https://github.com/wootra/nopromise-chaincall/issues) of the Turborepo project.
+
+## License
+
+The SVG Table Component is MIT License.
