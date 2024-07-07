@@ -1,130 +1,171 @@
-# Chain Call helper (ChainCallJs)
+Chaincalljs 2.0
 
-## Spoiler
+# Overview
 
-If you want to see how to use, go to  [How to use](#how-to-use) section directly.
+v1.0 was extremly simply js module that helped longer logic to readable. 
+While js community grows and impreved a lot with typescript, the coding process also has been changed.
 
-## how to install
+This project is targeting fast auto-completion and shorter code for the multiple processes to reduce complexity.
 
-```bash
-npm i chaincalljs
+## Install
+
+```sh
+npm i chaincalljs@2
 ```
 
+## Motivation
 
-## Why you need this module
+Let's say we have a long logic. Most of the time, we will need to call functions and get the return values and pass some of it into the next function.
+No problem. But what it will be very easy to make a complex inter-relations between multiple function calls.
 
-For example, Let's say I want to write this code:
+```javascript
 
-```js
-const arr = [1,2,3,4,5];
-let ret = func1(arr);
-ret = func2(ret);
-ret = func3(ret);
-console.log(ret);
+const a = funcA(param1, param2, param3);
+const {b,c,d} = a;
+const e = funcB(param1, param2, c, d);
+const f = funcC(param2, b, e);
+const {g, h} = f;
+const i = funcD(g, h);
 ```
 
-as you see, we want to make the code shorter. How about like this:
+Yeah. I know. it is common. But it makes the code to read and analyze harder.
+What if we can limit blocks?
 
-```js
-const arr = [1,2,3,4,5];
-const ret = func3(
-    func2(
-        func1(arr)));
-console.log(ret);
+```javascript
+const a = funcA(param1, param2, param3);
+let f;
+{
+    const {b,c,d} = a;
+    const e = funcB(param1, param2, c, d);
+    f = funcC(param2, b, e);
+}
+const {g, h} = f;
+const i = funcD(g, h);
 ```
 
-even though the order of run is func1, func2, func3, the code show up backward. I don't like it. And also, it is using multiple stacks. and it will be inefficient for the memory management.
+or we can make the block to the other function
+<details>
+<summary>Click to expand!</summary>
 
-What if we use Promise?
+```javascript
 
-```js
-const arr = [1,2,3,4,5];
-new Promise(resolve=>resolve(arr))
-.then(ret=>func1(ret))
-.then(ret=>func2(ret))
-.then(ret=>func3(ret))
-.then(console.log);
+const a = funcA(param1, param2, param3);
+const doSomeWorks = (a)=>{
+    const {b,c,d} = a;
+    const e = funcB(param1, param2, c, d);
+    return funcC(param2, b, e);
+}
+const f = doSomeWorks(a);
+const {g, h} = f;
+const i = funcD(g, h);
 ```
 
-Much better. If it is time-consuming jobs, it may be a good change because the callback console.log will be called when all the functions are finished. But if it is not? If they are pure syncronous functions and it will be finished quickly, and I want to do something after this function calls? 
+</details>
 
-We may need to make this function as async function and make this promise await. But still the function will be changed to async function. 
+Both of the approach will be good. But what if I can do something like this?
 
-Complexity will be increased. And also, unnecessary Promise call will reduce your performance.
+## Usage
 
-What if I can do like this?
+<details>
+<summary>Click to expand!</summary>
 
-```js
-const arr = [1,2,3,4,5];
-const ret = chainCallNp(
-    arr,
-    func1,
-    func2,
-    func3
-);
-console.log(ret);
+```javascript
+const i = chain(funcA(param1, param2, param3))
+    .then(({b,c,d})=>
+        chain(funcB(param1, param2, c, d))
+            .then((e)=>funcC(param2, b, e))
+    )
+    .then(({g, h})=>funcD(g, h))
+    .value();
 ```
+</details>
 
-This is purely syncronous function calls, and easy to understand as well.
+the flow above has specific block. Of course, param1, param2 is used in the multiple levels, but temporary return values are not overflowing.
 
-This module will help you to program like above and some of more extensive functionalities.
+The benefit of this flow is, you can clearly see the dependencies between flows without making unnecessary function logics which will require a lot of management.
 
+the whole chancalljs logic is very simple.
 
-## How to use
+<details>
+<summary>Click to expand!</summary>
 
-### UseCase 1 - Pure Syncronous Chain Calls
+```typescript
+export const chain = <T>(ret: T) => {
+	return {
+		then: <U>(fn: (_ret: T) => U) => {
+			return chain<U>(fn(ret));
+		},
+		value: () => {
+			return ret;
+		},
+	};
+};
 
-```js
-const np = require('chaincalljs');
-const ret = np.chainCallNp(
-    [1,2,3,4,5],
-    func1,
-    func2,
-    func3
-);
-console.log('chainCallNp:', ret);
 ```
+</details>
 
-### UseCase 2 - async call with 1 Promise
+but it is very powerful since it support type and enforce a clean coding standard.
 
-```js
-const np = require('chaincalljs');
-np.chainCall(
-    [1,2,3,4,5],
-    func1,
-    func2,
-    func3
-).then(ret=>console.log('chainCall:', ret));
+<details>
+<summary>Click to expand!</summary>
+
+```typescript
+const getAgeGroup = (age: number) => { ... };
+const getJobType = (job: string) => { ... };
+const nameCard = (name: string, jobType: string) => { ... };
+const printNamecard = (nameCard: string) => { ... };
+const increaseWorkDone = (ageGroup: string) => { ... };
+
+const isWorkIncreased = chain(['songhyeon', 'jun', 44, 'senior engineer'])
+    .then(([first, last, age, job]) => ({
+        name: `${first} ${last}`,
+        ageGroup: getAgeGroup(age),
+        jobType: getJobType(job),
+    }))
+    .then(({ name, ageGroup, jobType }) => {
+        // if the values should be skipped the chain flow and should be used in the middle, make another chain flow.
+        return chain(nameCard(name, jobType))
+            .then(ret => printNamecard(ret))
+            .then(isNameCardPrinted => {
+                if (isNameCardPrinted) {
+                    increaseWorkDone(ageGroup);
+                }
+                return false;
+            })
+            .value();
+    })
+    .value();
+expect(isWorkIncreased).toBe(false);
 ```
+</details>
 
-### UseCase 3 - when you want to call callbacks for each call
+when you see the code, you can see the whole complex flow in one glance.
 
-If your original code is like this:
+if above logic is written without chaincalljs, this would look like this:
 
-```js
-const arr = [1,2,3,4,5];
-let ret = func1(arr);
-callOther(ret, "first call");
-ret = func2(ret);
-callOther(ret, "second call");
-ret = func3(ret);
-console.log(ret);
+
+<details>
+<summary>Click to expand!</summary>
+
+```typescript
+const getAgeGroup = (age: number) => { ... };
+const getJobType = (job: string) => { ... };
+const nameCard = (name: string, jobType: string) => { ... };
+const printNamecard = (nameCard: string) => { ... };
+const increaseWorkDone = (ageGroup: string) => { ... };
+
+const [first, last, age, job] = ['songhyeon', 'jun', 44, 'senior engineer'];
+const name = `${first} ${last}`;
+const ageGroup = getAgeGroup(age);
+const jobType = getJobType(job);
+const namecard = nameCard(name, jobType);
+const isNameCardPrinted = printCard(nameCard);
+const isWorkIncreased = isNameCardPrinted ? increaseWorkDone(ageGroup) : false;
+
+expect(isWorkIncreased).toBe(false);
 ```
+</details>
 
-as you see, after 1st and 2nd call, you want to call callOther function with the result. using chaincalljs module, you can call like this:
+As you see, there are bunch of variables are created to help readability, but still it is very hard to find out the relationship of the each logic.
 
-```js
-const np = require('chaincalljs');
-const arr = [1,2,3,4,5];
-const ret = np.chainCallNp(
-    arr,
-    np.hoc(func1, "first call", callOther),
-    np.hoc(func2, "second call", callOther),
-    func3
-);
-console.log(ret);
-```
-
-the hoc function will return an object that the chaincalljs module can understand, and do what you want to do.
-
-Enjoy!
+with chaincalljs, you can organize the relationship easier to read by nature.
