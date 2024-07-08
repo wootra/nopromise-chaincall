@@ -1,6 +1,6 @@
 {
 	"name": "chaincalljs",
-	"version": "2.1.1-0",
+	"version": "2.1.1",
 	"description": "function that make syncronous chain call pretty and effectively.",
 	"main": "dist/index.js",
 	"module": "dist/index.mjs.js",
