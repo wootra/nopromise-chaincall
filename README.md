@@ -2,12 +2,19 @@ ChainCallJs 2.0
 
 # Overview
 
-v1.0 was extremly simply js module that helped longer logic to readable. 
-While js community grows and impreved a lot with typescript, the coding process also has been changed.
+ChaincallJs@2 is targeting below goals.
+1. Reduce complexity of the code
+1. Fast auto-completion
+1. Induce modularization of the code.
 
-This project is targeting fast auto-completion and shorter code for the multiple processes to reduce complexity.
+While this is a very simple library, it is suggesting stream-based programming to reduce complexity in a logical process.
 
-## Install
+For example, in Java, stream syntax simplifies the logical flow. We have similar structure in Promise.
+We have the new async/await model now, but Promise's .then() model helps to block the logical flows in the different boundary.
+
+ChainCallJs@2 is trying to provide similar structure in the synchronous model.
+
+## Install (Or just copy the code in your repo!)
 
 ```sh
 npm i chaincalljs@2
@@ -90,10 +97,10 @@ the whole chancalljs logic is very simple.
 <summary>Click to expand!</summary>
 
 ```typescript
-export const chain = <T>(ret: T) => {
+export const chain = <T, S>(ret: T, store: S = {} as S) => {
 	return {
-		then: <U>(fn: (_ret: T) => U) => {
-			return chain<U>(fn(ret));
+		then: <U>(fn: (_ret: T, store: S) => U) => {
+			return chain<U, S>(fn(ret, store), store);
 		},
 		value: () => {
 			return ret;
@@ -110,32 +117,28 @@ but it is very powerful since it support type and enforce a clean coding standar
 <summary>Click to expand!</summary>
 
 ```typescript
-const getAgeGroup = (age: number) => { ... };
-const getJobType = (job: string) => { ... };
-const nameCard = (name: string, jobType: string) => { ... };
-const printNamecard = (nameCard: string) => { ... };
-const increaseWorkDone = (ageGroup: string) => { ... };
 
-const isWorkIncreased = chain(['songhyeon', 'jun', 44, 'senior engineer'])
-    .then(([first, last, age, job]) => ({
-        name: `${first} ${last}`,
-        ageGroup: getAgeGroup(age),
-        jobType: getJobType(job),
-    }))
-    .then(({ name, ageGroup, jobType }) => {
-        // if the values should be skipped the chain flow and should be used in the middle, make another chain flow.
-        return chain(nameCard(name, jobType))
-            .then(ret => printNamecard(ret))
-            .then(isNameCardPrinted => {
-                if (isNameCardPrinted) {
-                    increaseWorkDone(ageGroup);
-                }
-                return false;
-            })
-            .value();
-    })
-    .value();
-expect(isWorkIncreased).toBe(false);
+const isWorkGroupDone = chain(['songhyeon', 'jun', 44, 'senior engineer'])
+			.then(([first, last, age, job]) => ({
+				name: `${first} ${last}`,
+				ageGroup: getAgeGroup(age),
+				jobType: getJobType(job),
+			}))
+			.then(({ name, ageGroup, jobType }) => {
+				// if the values should be skipped the chain flow and should be used in the middle, make another chain flow.
+				const store = {count: nameCards.length};
+				return chain([name, jobType], store)
+					.then(([name, jobType]) => nameCard(name, jobType))
+					.then((card, store) =>( printNamecard(card), store.count++, card))
+					.then((card, store) =>( printNamecard(card), store.count++, card))
+					.then((card, store) =>( printNamecard(card), store.count++, card))
+					.then((card, store) =>( printNamecard(card), store.count++, card))
+					.then((_, store)=>nameCards.length === store.count && store.count === 4)
+					.then(isNameCardPrinted =>(isNameCardPrinted && increaseWorkDone(ageGroup), ageGroup))
+					.then(ageGroup=>numOfWorkDone[ageGroup] > 0)
+					.value();
+			})
+			.value();
 ```
 </details>
 
@@ -148,28 +151,60 @@ if above logic is written without chaincalljs, this would look like this:
 <summary>Click to expand!</summary>
 
 ```typescript
-const getAgeGroup = (age: number) => { ... };
-const getJobType = (job: string) => { ... };
-const nameCard = (name: string, jobType: string) => { ... };
-const printNamecard = (nameCard: string) => { ... };
-const increaseWorkDone = (ageGroup: string) => { ... };
 
 const [first, last, age, job] = ['songhyeon', 'jun', 44, 'senior engineer'];
+
 const name = `${first} ${last}`;
+
 const ageGroup = getAgeGroup(age);
 const jobType = getJobType(job);
-const namecard = nameCard(name, jobType);
-const isNameCardPrinted = printCard(nameCard);
-const isWorkIncreased = isNameCardPrinted ? increaseWorkDone(ageGroup) : false;
+const card = nameCard(name, jobType);
 
-expect(isWorkIncreased).toBe(false);
+const store = {count: nameCards.length};
+
+printNamecard(card);
+printNamecard(card);
+printNamecard(card);
+printNamecard(card);
+
+const isNameCardPrinted = nameCards.length === store.count && store.count === 4;
+isNameCardPrinted && increaseWorkDone(ageGroup);
+
+const isWorkGroupDone = numOfWorkDone[ageGroup] > 0;
 ```
 </details>
 
-As you see, there are bunch of variables are created to help readability, but still it is very hard to find out the relationship of the each logic.
+It could be a preference of coding, but to me, chaincalljs solution looks more organized.
+On the contrary, the logic without chaincalljs tends to be a bit more scattered and hard to find the relationship between logics.
 
-with chaincalljs, you can organize the relationship easier to read by nature.
 
+## try/catch
+
+Unlike Promise's .then() model, chaincalljs does not support .catch() function.
+It makes harder to infer return type of the function. 
+I recommend you to just wrap it with try/catch to make the pattern more obvious.
+
+<details>
+<summary>Click to expand!</summary>
+
+```typescript
+const myFunc = ():D => {
+    try{
+        // since we don't know
+        return chain(funcA(param1, param2, param3)) // return A type
+            .then(funcB) // return B type 
+            .then(funcC) // return C type
+            .then(fundD) // return D type
+            .value(); // will return D type if everything passes.
+
+    }catch(e){
+        console.error("process failed", e);
+        return DEFAULT_RET as D; // return D type to keep the type consistent.
+    }
+}
+```
+
+</details>
 
 ## Support
 
